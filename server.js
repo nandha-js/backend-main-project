@@ -1,6 +1,6 @@
-// C:\Users\PC\Desktop\backend\server\server.js
+// server.js
 import dotenv from 'dotenv';
-import app from './app.js'; // ✅ Load app from app.js
+import app from './app.js';
 
 dotenv.config();
 
