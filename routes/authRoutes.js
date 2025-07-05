@@ -1,41 +1,26 @@
 import express from 'express';
-const router = express.Router();
-
 import {
   registerUser,
   loginUser,
   getUserProfile,
-  updateUserProfile,
+  updateDetails,
+  updatePassword,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/authController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
 
-/**
- * @route   POST /api/auth/register
- * @desc    Register a new user
- * @access  Public
- */
+const router = express.Router();
+
 router.post('/register', registerUser);
-
-/**
- * @route   POST /api/auth/login
- * @desc    Login user & get token
- * @access  Public
- */
 router.post('/login', loginUser);
-
-/**
- * @route   GET /api/auth/profile
- * @desc    Get logged-in user profile
- * @access  Private
- */
 router.get('/profile', protect, getUserProfile);
+router.put('/updatedetails', protect, updateDetails);
+router.put('/updatepassword', protect, updatePassword);
 
-/**
- * @route   PUT /api/auth/profile
- * @desc    Update logged-in user profile
- * @access  Private
- */
-router.put('/profile', protect, updateUserProfile);
+// Optional
+router.post('/forgotpassword', forgotPassword);
+router.put('/resetpassword/:token', resetPassword);
 
 export default router;

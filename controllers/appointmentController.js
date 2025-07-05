@@ -1,127 +1,96 @@
-// controllers/appointmentController.js
 import Appointment from '../models/Appointment.js';
 import Property from '../models/Property.js';
 
 /**
- * @desc    Book a property appointment
+ * @desc    Book an appointment
  * @route   POST /api/appointments
- * @access  Private
+ * @access  Private (Agent/Admin)
  */
-export const bookAppointment = async (req, res) => {
-  const { propertyId, date, time, message } = req.body;
+export const createAppointment = async (req, res) => {
+  const { property, date, time, message } = req.body;
 
-  if (!propertyId || !date || !time) {
-    return res.status(400).json({
-      success: false,
-      message: 'All fields are required',
-    });
+  if (!property || !date || !time || !message) {
+    return res.status(400).json({ success: false, message: 'All fields (property, date, time, message) are required.' });
   }
 
   try {
-    const property = await Property.findById(propertyId);
-
-    if (!property) {
-      return res.status(404).json({
-        success: false,
-        message: 'Property not found',
-      });
+    const propExists = await Property.findById(property);
+    if (!propExists) {
+      return res.status(404).json({ success: false, message: 'Property not found.' });
     }
 
     const appointment = await Appointment.create({
-      property: propertyId,
-      user: req.user.id,
+      property,
+      user: req.user?.id,
       date,
       time,
-      message,
+      message
     });
 
     res.status(201).json({ success: true, data: appointment });
   } catch (error) {
-    console.error('Book Appointment Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+    console.error('Create Appointment Error:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
 
 /**
- * @desc    Get all appointments (admin only)
+ * @desc    Get all appointments
  * @route   GET /api/appointments
- * @access  Private/Admin
+ * @access  Private (Admin)
  */
 export const getAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find()
-      .populate('user', 'name email')
-      .populate('property', 'title address');
+      .populate('property', 'title')
+      .populate('user', 'name email');
 
-    res.status(200).json({
-      success: true,
-      count: appointments.length,
-      data: appointments,
-    });
+    res.status(200).json({ success: true, data: appointments });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+    console.error('Get Appointments Error:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
 
 /**
- * @desc    Get a single appointment
+ * @desc    Get single appointment by ID
  * @route   GET /api/appointments/:id
- * @access  Private
+ * @access  Private (Admin)
  */
 export const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
-      .populate('user', 'name email')
-      .populate('property', 'title address');
+      .populate('property', 'title')
+      .populate('user', 'name email');
 
     if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Appointment not found',
-      });
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
     }
 
     res.status(200).json({ success: true, data: appointment });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+    console.error('Get Appointment By ID Error:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
 
 /**
- * @desc    Delete appointment
+ * @desc    Delete an appointment
  * @route   DELETE /api/appointments/:id
- * @access  Private
+ * @access  Private (Admin)
  */
 export const deleteAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
 
     if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Appointment not found',
-      });
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
     }
 
     await appointment.deleteOne();
-    res.status(200).json({ success: true, message: 'Appointment deleted' });
+    res.status(200).json({ success: true, message: 'Appointment cancelled' });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+    console.error('Delete Appointment Error:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };

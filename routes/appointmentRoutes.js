@@ -1,7 +1,6 @@
-// routes/appointmentRoutes.js
 import express from 'express';
 import {
-  bookAppointment,
+  createAppointment,
   getAppointments,
   getAppointmentById,
   deleteAppointment,
@@ -10,12 +9,14 @@ import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/')
-  .post(protect, bookAppointment)
+router
+  .route('/')
+  .post(protect, authorize('agent', 'admin'), createAppointment)
   .get(protect, authorize('admin'), getAppointments);
 
-router.route('/:id')
-  .get(protect, getAppointmentById)
-  .delete(protect, deleteAppointment);
+router
+  .route('/:id')
+  .get(protect, authorize('admin'), getAppointmentById)
+  .delete(protect, authorize('admin'), deleteAppointment);
 
 export default router;
