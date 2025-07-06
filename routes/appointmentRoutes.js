@@ -11,12 +11,12 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(protect, authorize('agent', 'admin'), createAppointment)
-  .get(protect, authorize('admin'), getAppointments);
+  .post(protect, authorize('agent', 'user', 'admin'), createAppointment)
+  .get(protect, authorize('admin','agent'), getAppointments);
 
 router
   .route('/:id')
-  .get(protect, authorize('admin'), getAppointmentById)
+  .get(protect, authorize('admin','agent'), getAppointmentById)
   .delete(protect, authorize('admin'), deleteAppointment);
 
 export default router;
