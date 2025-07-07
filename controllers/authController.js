@@ -7,20 +7,30 @@ import sendEmail from '../utils/sendEmail.js';
  * Register a new user
  */
 export const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, phone } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
   }
 
   try {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ success: false, message: 'User already exists' });
 
-    const allowedRoles = ['user', 'agent'];
+    const allowedRoles = ['user', 'agent', 'admin']; // include admin if needed
     const assignedRole = allowedRoles.includes(role) ? role : 'user';
 
-    const user = await User.create({ name, email, password, role: assignedRole });
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone: phone || '',
+      role: assignedRole,
+    });
 
     res.status(201).json({
       success: true,
@@ -118,6 +128,10 @@ export const updatePassword = async (req, res) => {
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) return res.status(401).json({ success: false, message: 'Incorrect current password' });
 
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+    }
+
     user.password = newPassword;
     await user.save();
 
@@ -171,6 +185,10 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+
+    if (req.body.password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    }
 
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
