@@ -26,24 +26,25 @@ connectDB();
 
 // 🌐 Allowed Origins
 const allowedOrigins = [
-  'http://localhost:5173',
-  'https://real-estate-client.onrender.com', // your frontend on render
+  'http://localhost:5173', // Vite Dev
+  'https://real-estate-client.onrender.com', // ✅ Your deployed frontend
 ];
 
-// 🌐 CORS Middleware
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl/postman) or from allowed list
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS Error: Origin ${origin} not allowed.`));
-      }
-    },
-    credentials: true,
-  })
-);
+// 🌐 CORS Config
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`❌ Blocked by CORS: ${origin}`);
+      callback(new Error(`CORS Error: Origin ${origin} not allowed.`));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 // 🧠 Core Middlewares
 app.use(express.json());
