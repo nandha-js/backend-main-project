@@ -9,14 +9,16 @@ import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router
-  .route('/')
-  .post(protect, authorize('agent', 'user', 'admin'), createAppointment)
-  .get(protect, authorize('admin','agent'), getAppointments);
+// ✅ Create appointment for specific property (user only)
+router.post('/:propertyId', protect, authorize('user', 'admin'), createAppointment);
 
+// ✅ Get all appointments (agent and admin)
+router.get('/', protect, authorize('admin', 'agent'), getAppointments);
+
+// ✅ Get and delete appointment by ID
 router
-  .route('/:id')
-  .get(protect, authorize('admin','agent'), getAppointmentById)
+  .route('/byid/:id')
+  .get(protect, authorize('admin', 'agent'), getAppointmentById)
   .delete(protect, authorize('admin'), deleteAppointment);
 
 export default router;
