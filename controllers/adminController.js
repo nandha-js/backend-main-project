@@ -14,7 +14,7 @@ export const getDashboardSummary = async (req, res) => {
       data: {
         totalUsers,
         totaladmin,
-        totalAgents,
+        totalAgents, 
         totalProperties,
       },
     });

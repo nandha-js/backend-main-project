@@ -22,3 +22,4 @@ router.put('/:id', protect, authorize('agent', 'admin'), updateProperty);
 router.delete('/:id', protect, authorize('agent', 'admin'), deleteProperty);
 
 export default router;
+ 

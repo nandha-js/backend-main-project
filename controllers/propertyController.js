@@ -154,7 +154,7 @@ export const updateProperty = async (req, res) => {
     property.size = size ?? property.size;
     property.rooms = rooms ?? property.rooms;
     property.bedrooms = bedrooms ?? property.bedrooms;
-    property.bathrooms = bathrooms ?? property.bathrooms;
+    property.bathrooms = bathrooms ?? property.bathrooms; 
     property.images = images ?? property.images;
 
     const updatedProperty = await property.save();

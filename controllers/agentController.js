@@ -179,5 +179,5 @@ export const deleteAgent = async (req, res) => {
       message: 'Server Error',
       error: error.message,
     });
-  }
+  } 
 };

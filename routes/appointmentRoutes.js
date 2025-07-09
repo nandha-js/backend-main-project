@@ -33,3 +33,4 @@ router
   .delete(protect, authorize('admin'), deleteAppointment);
 
 export default router;
+ 

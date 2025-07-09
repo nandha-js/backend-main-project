@@ -68,3 +68,4 @@ export const updateAgentValidator = [
     .withMessage('Photo must be a string (URL or filename)')
     .trim(),
 ];
+ 

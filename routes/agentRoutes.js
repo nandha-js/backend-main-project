@@ -26,3 +26,4 @@ router
   .delete(protect, authorize("admin"), deleteAgent);
 
 export default router;
+ 

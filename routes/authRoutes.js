@@ -48,3 +48,4 @@ router.put('/profile', protect, updateProfileValidator, validate, updateDetails)
 router.put('/password', protect, updatePassword);
 
 export default router;
+ 

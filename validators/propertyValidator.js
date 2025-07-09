@@ -121,3 +121,4 @@ export const updatePropertyValidator = [
     .withMessage('Bathrooms must be a valid number')
     .toInt(),
 ];
+ 

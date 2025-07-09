@@ -32,3 +32,4 @@ router.get('/properties', getAllProperties);
 router.delete('/properties/:id', deleteProperty);
 
 export default router;
+ 
