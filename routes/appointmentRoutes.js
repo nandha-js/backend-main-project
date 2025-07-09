@@ -14,13 +14,14 @@ const router = express.Router();
 router.post(
   '/:propertyId',
   protect,
-  authorize('agent', 'admin'),
+  authorize('user', 'agent', 'admin'), // allow all roles
   (req, res, next) => {
     req.body.property = req.params.propertyId;
     next();
   },
   createAppointment
 );
+
 
 // Get all appointments (admin & agent only)
 router.get('/', protect, authorize('admin', 'agent'), getAppointments);
