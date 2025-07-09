@@ -1,83 +1,65 @@
-🏠 Real Estate Backend API
-A complete backend API for a real estate platform built with Node.js, Express.js, MongoDB, and JWT Authentication.
+🏡 Real Estate Backend Summary (MERN Stack) 
 
-🔗 Live Backend URL
-https://real-estate-api-w14p.onrender.com
+🚀 Technologies Used:
+Node.js + Express.js – REST API framework
 
+MongoDB + Mongoose – Database & ODM
 
-server/
-├── controllers/        # Route handler logic
-├── routes/             # API endpoints
-├── models/             # Mongoose schemas
-├── middleware/         # Auth, error, and role middleware
-├── utils/              # Utility functions (e.g. geocoder)
-├── config/             # DB, Cloudinary, etc.
-├── .env                # Environment variables
-└── app.js              # App entry point
+JWT – Authentication
 
-git clone https://github.com/your-username/real-estate-backend.git
-cd real-estate-backend
+Nodemailer (Mailtrap) – Email sending
 
+Cloudinary – Image upload
 
-npm install
+OpenStreetMap (via Mapbox) – Geolocation
 
-npm run dev
+Express-Validator – Input validation
+
+Render.com – Deployment
 
 
- API Base URLs
-Local: http://localhost:5000/api
-
-Production: https://real-estate-api-w14p.onrender.com/api
-
-| Method | Route            | Access  | Description                |
-| ------ | ---------------- | ------- | -------------------------- |
-| POST   | `/auth/register` | Public  | Register agent or admin    |
-| POST   | `/auth/login`    | Public  | Login and receive token    |
-| GET    | `/auth/profile`  | Private | Get logged-in user profile |
+               Backend Folder Structure 
 
 
-| Method | Route         | Access      | Description                |
-| ------ | ------------- | ----------- | -------------------------- |
-| GET    | `/agents`     | Agent/Admin | Get all agents             |
-| GET    | `/agents/:id` | Agent/Admin | Get agent by ID + listings |
-| POST   | `/agents`     | Admin       | Manually create agent      |
-| PUT    | `/agents/:id` | Admin       | Update agent details       |
-| DELETE | `/agents/:id` | Admin       | Delete agent               |
+ backend-main-project/
+├── config/               # DB, Cloudinary, Mail, Geocoder configs
+├── controllers/          # Route logic
+├── models/               # Mongoose Schemas
+├── routes/               # API Endpoints
+├── validators/           # Request body validations
+├── middleware/           # Auth, role, error handling, rate limit
+├── utils/                # Helpers (email, geocoder)
+├── .env                  # Environment variables
+├── app.js                # Express app setup
+├── server.js             # Server entry point
+ 
 
-| Method | Route             | Access | Description         |
-| ------ | ----------------- | ------ | ------------------- |
-| GET    | `/properties`     | Public | List all properties |
-| GET    | `/properties/:id` | Public | Get property by ID  |
-| POST   | `/properties`     | Agent  | Create new property |
-| PUT    | `/properties/:id` | Agent  | Update property     |
-| DELETE | `/properties/:id` | Agent  | Delete property     |
+ Auth & Roles System
+Roles: user, agent, admin
 
+Login returns a JWT token → Required in protected routes
 
-| Method | Route               | Access      | Description           |
-| ------ | ------------------- | ----------- | --------------------- |
-| POST   | `/appointments`     | Agent/Admin | Book an appointment   |
-| GET    | `/appointments`     | Admin       | Get all appointments  |
-| GET    | `/appointments/:id` | Admin       | Get appointment by ID |
-| DELETE | `/appointments/:id` | Admin       | Cancel appointment    |
+Role-based access:
 
+User: Browse properties, send messages
 
-| Method | Route           | Access | Description            |
-| ------ | --------------- | ------ | ---------------------- |
-| POST   | `/messages`     | Public | Send inquiry message   |
-| GET    | `/messages`     | Admin  | View all inquiries     |
-| DELETE | `/messages/:id` | Admin  | Delete inquiry message |
+Agent: CRUD properties, view own profile & appointments
 
+Admin: Full access to users, agents, properties, dashboard  
+ 
+               Deployed API Base URL 
 
- Connecting Frontend (React)
-.env in React App:
-
-VITE_API_URL=https://real-estate-api-w14p.onrender.com/api
+    https://backend-main-project.onrender.com/api
 
 
+        🔌 How to Connect Frontend (React)   
+          ✅ Step 1: Add API Base in .env
 
+VITE_API_URL=https://backend-main-project.onrender.com/api
 
-// src/services/api.js
-import axios from 'axios';
+          ✅ Step 2: Axios Setup (src/services/api.js)
+
+          import axios from 'axios';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -93,36 +75,82 @@ API.interceptors.request.use((config) => {
 export default API;
 
 
-Authorization: Bearer <your_token_here>
+
+Main API Routes Summary  
 
 
-✅ Testing Checklist
- Register / Login
 
- Create & Manage Agents
-
- Create, Update, Delete Properties
-
- Book & View Appointments
-
- Send & View Messages
+| Method | Route          | Access  | Description               |
+| ------ | -------------- | ------- | ------------------------- |
+| POST   | /auth/register | Public  | Register user/agent/admin |
+| POST   | /auth/login    | Public  | Login + token             |
+| GET    | /auth/profile  | Private | Logged-in user profile    |
+| PUT    | /auth/profile  | Private | Update profile            |
+| PUT    | /auth/password | Private | Update password           |
 
 
-📌 Deployment Notes
-Database: MongoDB Atlas
 
-Hosting: Render.com
 
-Frontend URL: Must be added to FRONTEND_URL in backend .env
+👤 Admin (requires role: admin)
 
-CORS: Properly configured using cors middleware to allow frontend requests
+| Method | Route                  | Description                       |
+| ------ | ---------------------- | --------------------------------- |
+| GET    | /admin/dashboard       | View counts of users, agents, etc |
+| GET    | /admin/users           | List all users                    |
+| DELETE | /admin/users/\:id      | Delete a user                     |
+| GET    | /admin/agents          | List all agents                   |
+| DELETE | /admin/agents/\:id     | Delete an agent                   |
+| GET    | /admin/properties      | List all properties               |
+| DELETE | /admin/properties/\:id | Delete a property                 |
 
-✅ Example CORS Setup:
+🏠 Properties
 
-const cors = require('cors');
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true,
-}));
 
- 
+| Method | Route            | Access      |
+| ------ | ---------------- | ----------- |
+| GET    | /properties      | Public      |
+| GET    | /properties/\:id | Public      |
+| POST   | /properties      | Agent/Admin |
+| PUT    | /properties/\:id | Agent/Admin |
+| DELETE | /properties/\:id | Agent/Admin |
+
+📅 Appointments
+
+
+| Method | Route                      | Access      |
+| ------ | -------------------------- | ----------- |
+| POST   | /appointments/\:propertyId | Agent/Admin |
+| GET    | /appointments              | Admin       |
+| GET    | /appointments/\:id         | Admin       |
+| DELETE | /appointments/\:id         | Admin       |
+
+
+📩 Messages
+
+| Method | Route          | Access |
+| ------ | -------------- | ------ |
+| POST   | /messages      | Public |
+| GET    | /messages      | Admin  |
+| DELETE | /messages/\:id | Admin  |
+
+
+✅ Frontend Auth Flow
+Register or Login from React
+
+Store the JWT token in localStorage
+
+Axios sends it via header for protected routes
+
+Use role (user, agent, admin) from token to control frontend access
+
+
+
+📦 Deployment Recap
+
+| Component | Hosted On                                           |
+| --------- | --------------------------------------------------- |
+| Backend   | Render.com                                          |
+| Frontend  | Vite + React (You can also host on Netlify, Vercel) |
+| Database  | MongoDB Atlas                                       |
+| Email     | Mailtrap.io                                         |
+| Images    | Cloudinary                                          |
