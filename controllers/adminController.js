@@ -1,24 +1,28 @@
 import User from '../models/User.js';
-import Agent from '../models/Agent.js';
 import Property from '../models/Property.js';
 
 // @desc    Get dashboard summary
 export const getDashboardSummary = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const totalAgents = await Agent.countDocuments();
+    const totalUsers = await User.countDocuments({ role: 'user' });
+    const totaladmin = await User.countDocuments({ role: 'admin' });
+    const totalAgents = await User.countDocuments({ role: 'agent' });
     const totalProperties = await Property.countDocuments();
 
     res.status(200).json({
       success: true,
-      data: { totalUsers, totalAgents, totalProperties },
+      data: {
+        totalUsers,
+        totaladmin,
+        totalAgents,
+        totalProperties,
+      },
     });
   } catch (error) {
     console.error('❌ Dashboard summary error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
-
 // @desc    Get all users
 export const getAllUsers = async (req, res) => {
   try {
@@ -45,10 +49,10 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// @desc    Get all agents
+// ✅ @desc    Get all agents (from User collection)
 export const getAllAgents = async (req, res) => {
   try {
-    const agents = await Agent.find();
+    const agents = await User.find({ role: 'agent' }).select('-password');
     res.status(200).json({ success: true, data: agents });
   } catch (error) {
     console.error('❌ Get all agents error:', error.message);
@@ -56,10 +60,10 @@ export const getAllAgents = async (req, res) => {
   }
 };
 
-// @desc    Delete an agent
+// ✅ @desc    Delete an agent (from User collection)
 export const deleteAgent = async (req, res) => {
   try {
-    const agent = await Agent.findById(req.params.id);
+    const agent = await User.findOne({ _id: req.params.id, role: 'agent' });
     if (!agent) {
       return res.status(404).json({ success: false, message: 'Agent not found' });
     }

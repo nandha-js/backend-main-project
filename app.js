@@ -15,6 +15,7 @@ import propertyRoutes from './routes/propertyRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 // Middleware imports
 import { errorHandler, notFound } from './middleware/errorHandler.js';
@@ -72,6 +73,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 Not Found Middleware
 app.use(notFound);
