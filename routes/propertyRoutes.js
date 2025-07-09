@@ -1,5 +1,4 @@
 import express from 'express';
-const router = express.Router();
 
 import {
   getProperties,
@@ -11,8 +10,13 @@ import {
 
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
+const router = express.Router();
+
+// Public routes
 router.get('/', getProperties);
 router.get('/:id', getPropertyById);
+
+// Protected routes (agents and admins only)
 router.post('/', protect, authorize('agent', 'admin'), createProperty);
 router.put('/:id', protect, authorize('agent', 'admin'), updateProperty);
 router.delete('/:id', protect, authorize('agent', 'admin'), deleteProperty);

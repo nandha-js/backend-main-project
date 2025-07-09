@@ -1,24 +1,42 @@
 import { body } from 'express-validator';
 
 /**
- * @desc   Validation for sending a new message
+ * @desc   Validation for creating a message
  */
 export const createMessageValidator = [
-  body('sender')
+  body('name')
     .notEmpty()
-    .withMessage('Sender ID is required')
-    .isMongoId()
-    .withMessage('Sender ID must be a valid MongoDB ObjectId'),
+    .withMessage('Name is required')
+    .isLength({ min: 2 })
+    .withMessage('Name must be at least 2 characters')
+    .trim()
+    .escape(),
 
-  body('receiver')
+  body('email')
     .notEmpty()
-    .withMessage('Receiver ID is required')
-    .isMongoId()
-    .withMessage('Receiver ID must be a valid MongoDB ObjectId'),
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email')
+    .normalizeEmail(),
 
-  body('content')
+  body('message')
     .notEmpty()
     .withMessage('Message content is required')
-    .isLength({ min: 1 })
-    .withMessage('Message content cannot be empty'),
+    .trim()
+    .escape(),
+
+  body('phone')
+    .optional()
+    .isMobilePhone()
+    .withMessage('Please provide a valid phone number'),
+
+  body('property')
+    .optional()
+    .isMongoId()
+    .withMessage('Invalid property ID'),
+
+  body('user')
+    .optional()
+    .isMongoId()
+    .withMessage('Invalid user ID'),
 ];

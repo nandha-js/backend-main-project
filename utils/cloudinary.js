@@ -1,9 +1,8 @@
-import cloudinaryModule from 'cloudinary';
+// utils/cloudinary.js
+import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-const cloudinary = cloudinaryModule.v2;
 
 /**
  * @desc    Configure Cloudinary with environment variables
@@ -24,11 +23,11 @@ export const uploadToCloudinary = async (filePath, folder = '') => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
       folder,
-      resource_type: 'auto', // auto detects images, videos, pdf etc.
+      resource_type: 'auto',
     });
     return result;
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
+    console.error('Cloudinary upload error:', error.message || error);
     throw new Error('Cloudinary upload failed');
   }
 };
@@ -43,7 +42,7 @@ export const deleteFromCloudinary = async (publicId) => {
     const result = await cloudinary.uploader.destroy(publicId);
     return result;
   } catch (error) {
-    console.error('Cloudinary delete error:', error);
+    console.error('Cloudinary delete error:', error.message || error);
     throw new Error('Cloudinary delete failed');
   }
 };

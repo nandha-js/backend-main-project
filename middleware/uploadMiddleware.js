@@ -1,8 +1,10 @@
 import multer from 'multer';
 import path from 'path';
 
-// === Local disk storage setup ===
-// Destination: /uploads
+/**
+ * @desc    Local disk storage configuration for Multer
+ * @access  Private (used where needed)
+ */
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, 'uploads/');
@@ -13,23 +15,27 @@ const storage = multer.diskStorage({
   },
 });
 
-// === File type check (images only) ===
+/**
+ * @desc    Only allow image file uploads
+ */
 const fileFilter = (req, file, cb) => {
   const fileTypes = /jpeg|jpg|png|gif/;
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = fileTypes.test(file.mimetype);
 
   if (extname && mimetype) {
-    return cb(null, true);
+    cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif).'));
+    cb(new Error('Only image files are allowed: jpeg, jpg, png, gif'), false);
   }
 };
 
-// === Multer upload instance ===
+/**
+ * @desc    Multer instance for handling file uploads
+ */
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
   fileFilter,
 });
 

@@ -19,7 +19,9 @@ export const registerUser = async (req, res) => {
 
   try {
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ success: false, message: 'User already exists' });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
 
     const allowedRoles = ['user', 'agent', 'admin']; // include admin if needed
     const assignedRole = allowedRoles.includes(role) ? role : 'user';
@@ -43,7 +45,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Register User Error:', error);
+    console.error('Register User Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -53,8 +55,9 @@ export const registerUser = async (req, res) => {
  */
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
+  if (!email || !password) {
     return res.status(400).json({ success: false, message: 'Please provide email and password' });
+  }
 
   try {
     const user = await User.findOne({ email }).select('+password');
@@ -73,7 +76,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Login Error:', error);
+    console.error('Login Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -87,7 +90,7 @@ export const getUserProfile = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    console.error('Get Profile Error:', error);
+    console.error('Get Profile Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -106,11 +109,15 @@ export const updateDetails = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
       runValidators: true,
-    });
+    }).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
     res.status(200).json({ success: true, data: user });
   } catch (err) {
-    console.error('Update Details Error:', err);
+    console.error('Update Details Error:', err.message);
     res.status(500).json({ success: false, message: 'Server Error', error: err.message });
   }
 };
@@ -121,6 +128,14 @@ export const updateDetails = async (req, res) => {
 export const updatePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: 'Please provide current and new password' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+  }
+
   try {
     const user = await User.findById(req.user.id).select('+password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -128,16 +143,12 @@ export const updatePassword = async (req, res) => {
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) return res.status(401).json({ success: false, message: 'Incorrect current password' });
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
-    }
-
     user.password = newPassword;
     await user.save();
 
     res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Update Password Error:', error);
+    console.error('Update Password Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -147,6 +158,10 @@ export const updatePassword = async (req, res) => {
  */
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Please provide an email address' });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -167,7 +182,7 @@ export const forgotPassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Reset email sent successfully' });
   } catch (error) {
-    console.error('ForgotPassword Error:', error);
+    console.error('ForgotPassword Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -186,7 +201,7 @@ export const resetPassword = async (req, res) => {
 
     if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired token' });
 
-    if (req.body.password.length < 6) {
+    if (!req.body.password || req.body.password.length < 6) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
@@ -198,7 +213,7 @@ export const resetPassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Password has been reset' });
   } catch (error) {
-    console.error('ResetPassword Error:', error);
+    console.error('ResetPassword Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };

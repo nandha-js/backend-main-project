@@ -1,3 +1,4 @@
+// routes/adminRoutes.js
 import express from 'express';
 import {
   getDashboardSummary,
@@ -8,62 +9,26 @@ import {
   getAllProperties,
   deleteProperty,
 } from '../controllers/adminController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-/**
- * @desc Protect all admin routes with authentication and admin role authorization
- */
-router.use(protect, admin);
+// Protect all admin routes with authentication and admin role
+router.use(protect, authorize('admin'));
 
-/**
- * @route   GET /api/admin/dashboard
- * @desc    Get dashboard summary (stats, counts, etc.)
- * @access  Private/Admin
- */
+// Dashboard Summary
 router.get('/dashboard', getDashboardSummary);
 
-/**
- * @route   GET /api/admin/users
- * @desc    Get all users
- * @access  Private/Admin
- */
+// Users
 router.get('/users', getAllUsers);
-
-/**
- * @route   DELETE /api/admin/users/:id
- * @desc    Delete user by ID
- * @access  Private/Admin
- */
 router.delete('/users/:id', deleteUser);
 
-/**
- * @route   GET /api/admin/agents
- * @desc    Get all agents
- * @access  Private/Admin
- */
+// Agents
 router.get('/agents', getAllAgents);
-
-/**
- * @route   DELETE /api/admin/agents/:id
- * @desc    Delete agent by ID
- * @access  Private/Admin
- */
 router.delete('/agents/:id', deleteAgent);
 
-/**
- * @route   GET /api/admin/properties
- * @desc    Get all properties
- * @access  Private/Admin
- */
+// Properties
 router.get('/properties', getAllProperties);
-
-/**
- * @route   DELETE /api/admin/properties/:id
- * @desc    Delete property by ID
- * @access  Private/Admin
- */
 router.delete('/properties/:id', deleteProperty);
 
 export default router;

@@ -6,49 +6,59 @@ import { body } from 'express-validator';
 export const createPropertyValidator = [
   body('title')
     .notEmpty()
-    .withMessage('Property title is required'),
+    .withMessage('Property title is required')
+    .trim()
+    .escape(),
 
   body('description')
     .notEmpty()
-    .withMessage('Property description is required'),
+    .withMessage('Property description is required')
+    .trim()
+    .escape(),
 
   body('price')
     .notEmpty()
     .withMessage('Property price is required')
     .isNumeric()
-    .withMessage('Price must be a number'),
+    .withMessage('Price must be a number')
+    .toFloat(),
 
   body('address')
     .notEmpty()
-    .withMessage('Property address is required'),
-
-  body('location')
-    .notEmpty()
-    .withMessage('Property location is required')
-    .custom((value) => {
-      if (!value.coordinates || !Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
-        throw new Error('Location coordinates must be an array of [longitude, latitude]');
-      }
-      return true;
-    }),
+    .withMessage('Property address is required')
+    .trim()
+    .escape(),
 
   body('type')
     .notEmpty()
     .withMessage('Property type is required')
-    .isIn(['Apartment', 'House', 'Studio', 'Villa', 'Plot', 'Commercial'])
+    .isIn(['apartment', 'house', 'villa'])
     .withMessage('Invalid property type'),
 
   body('size')
     .notEmpty()
     .withMessage('Property size is required')
     .isNumeric()
-    .withMessage('Size must be a number'),
+    .withMessage('Size must be a number')
+    .toFloat(),
 
   body('rooms')
-    .notEmpty()
-    .withMessage('Number of rooms is required')
-    .isInt({ min: 1 })
-    .withMessage('Rooms must be at least 1'),
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Rooms must be a valid number')
+    .toInt(),
+
+  body('bedrooms')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Bedrooms must be a valid number')
+    .toInt(),
+
+  body('bathrooms')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Bathrooms must be a valid number')
+    .toInt(),
 ];
 
 /**
@@ -58,44 +68,56 @@ export const updatePropertyValidator = [
   body('title')
     .optional()
     .notEmpty()
-    .withMessage('Property title cannot be empty'),
+    .withMessage('Property title cannot be empty')
+    .trim()
+    .escape(),
 
   body('description')
     .optional()
     .notEmpty()
-    .withMessage('Property description cannot be empty'),
+    .withMessage('Property description cannot be empty')
+    .trim()
+    .escape(),
 
   body('price')
     .optional()
     .isNumeric()
-    .withMessage('Price must be a number'),
+    .withMessage('Price must be a number')
+    .toFloat(),
 
   body('address')
     .optional()
     .notEmpty()
-    .withMessage('Property address cannot be empty'),
-
-  body('location')
-    .optional()
-    .custom((value) => {
-      if (value && (!value.coordinates || !Array.isArray(value.coordinates) || value.coordinates.length !== 2)) {
-        throw new Error('Location coordinates must be an array of [longitude, latitude]');
-      }
-      return true;
-    }),
+    .withMessage('Property address cannot be empty')
+    .trim()
+    .escape(),
 
   body('type')
     .optional()
-    .isIn(['Apartment', 'House', 'Studio', 'Villa', 'Plot', 'Commercial'])
+    .isIn(['apartment', 'house', 'villa'])
     .withMessage('Invalid property type'),
 
   body('size')
     .optional()
     .isNumeric()
-    .withMessage('Size must be a number'),
+    .withMessage('Size must be a number')
+    .toFloat(),
 
   body('rooms')
     .optional()
-    .isInt({ min: 1 })
-    .withMessage('Rooms must be at least 1'),
+    .isInt({ min: 0 })
+    .withMessage('Rooms must be a valid number')
+    .toInt(),
+
+  body('bedrooms')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Bedrooms must be a valid number')
+    .toInt(),
+
+  body('bathrooms')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Bathrooms must be a valid number')
+    .toInt(),
 ];

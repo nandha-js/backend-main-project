@@ -5,19 +5,29 @@ import {
   getAppointmentById,
   deleteAppointment,
 } from '../controllers/appointmentController.js';
-import { protect, authorize } from '../middleware/authMiddleware.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// ✅ Create appointment for specific property (user only)
-router.post('/:propertyId', protect, authorize('user', 'admin'), createAppointment);
+// Create appointment: inject propertyId param into body, then create
+router.post(
+  '/:propertyId',
+  protect,
+  authorize('agent', 'admin'),
+  (req, res, next) => {
+    req.body.property = req.params.propertyId;
+    next();
+  },
+  createAppointment
+);
 
-// ✅ Get all appointments (agent and admin)
+// Get all appointments (admin & agent only)
 router.get('/', protect, authorize('admin', 'agent'), getAppointments);
 
-// ✅ Get and delete appointment by ID
+// Get appointment by ID (admin & agent), delete appointment (admin only)
 router
-  .route('/byid/:id')
+  .route('/:id')
   .get(protect, authorize('admin', 'agent'), getAppointmentById)
   .delete(protect, authorize('admin'), deleteAppointment);
 

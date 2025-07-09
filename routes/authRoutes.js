@@ -5,22 +5,46 @@ import {
   getUserProfile,
   updateDetails,
   updatePassword,
-  forgotPassword,
-  resetPassword,
 } from '../controllers/authController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
+import {
+  registerValidator,
+  loginValidator,
+  updateProfileValidator,
+} from '../validators/authValidator.js';
+
+import { validationResult } from 'express-validator';
 
 const router = express.Router();
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.get('/profile', protect, getUserProfile);
-router.put('/updatedetails', protect, updateDetails);
-router.put('/updatepassword', protect, updatePassword);
+// Middleware to handle validation errors from express-validator
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+  next();
+};
 
-// Optional
-router.post('/forgotpassword', forgotPassword);
-router.put('/resetpassword/:token', resetPassword);
+// @route    POST /api/auth/register
+// @desc     Register a new user
+router.post('/register', registerValidator, validate, registerUser);
+
+// @route    POST /api/auth/login
+// @desc     Login user and get token
+router.post('/login', loginValidator, validate, loginUser);
+
+// @route    GET /api/auth/profile
+// @desc     Get logged in user profile
+router.get('/profile', protect, getUserProfile);
+
+// @route    PUT /api/auth/profile
+// @desc     Update logged in user profile
+router.put('/profile', protect, updateProfileValidator, validate, updateDetails);
+
+// @route    PUT /api/auth/password
+// @desc     Update logged in user password
+router.put('/password', protect, updatePassword);
 
 export default router;

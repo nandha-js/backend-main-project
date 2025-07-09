@@ -1,38 +1,40 @@
-// 📍 File: server/app.js
-import express from 'express';
+// backend-main-project/app.js
+
 import dotenv from 'dotenv';
+dotenv.config();  // Load .env early
+
+import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import connectDB from './config/db.js';
 
-// 📦 Route imports
+// Route imports
 import authRoutes from './routes/authRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 
-// 🛡️ Middleware
+// Middleware imports
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import rateLimit from './middleware/rateLimit.js';
 
-dotenv.config();
-
 const app = express();
 
-// 🔗 Connect MongoDB
+// Connect to MongoDB
 connectDB();
 
-// 🌐 Allowed Origins
+// Allowed origins for CORS
 const allowedOrigins = [
-  'http://localhost:5173', // Vite Dev
-  'https://real-estate-client.onrender.com', // ✅ Your deployed frontend
+  'http://localhost:5173', // Vite dev server
+  'https://real-estate-client.onrender.com', // Your deployed frontend
 ];
 
-// 🌐 CORS Config
+// CORS options
 const corsOptions = {
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -44,15 +46,18 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+// Middlewares
 app.use(cors(corsOptions));
-
-// 🧠 Core Middlewares
-app.use(express.json());
+app.use(express.json({ limit: '10kb' })); // Protect against large payloads
 app.use(helmet());
 app.use(rateLimit);
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-// ✅ Root Route (Health check for Render)
+// Use morgan logger in development mode only
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Health check route
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -61,15 +66,17 @@ app.get('/', (req, res) => {
   });
 });
 
-// 📌 Mount Routes
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/messages', messageRoutes);
 
-// ❌ 404 + Error Handler
+// 404 Not Found Middleware
 app.use(notFound);
+
+// Global Error Handling Middleware
 app.use(errorHandler);
 
 export default app;

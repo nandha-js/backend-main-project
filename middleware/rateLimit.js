@@ -5,22 +5,26 @@ import rateLimit from 'express-rate-limit';
  * @access  Global
  */
 const rateLimiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // Default: 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // Default: 100 requests per windowMs
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100, // Max 100 requests per window
 
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.',
   },
 
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false,  // Disable `X-RateLimit-*` headers (deprecated)
+  standardHeaders: true,  // Send rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false,   // Disable the deprecated `X-RateLimit-*` headers
 
   /**
-   * @desc    Customize handler to log and respond uniformly
+   * @desc    Handler for rate limit exceeded
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   * @param {Function} _next
+   * @param {Object} options
    */
-  handler: (req, res, next, options) => {
-    console.warn(`Rate limit exceeded for IP: ${req.ip}`);
+  handler: (req, res, _next, options) => {
+    console.warn(`🔒 Rate limit exceeded for IP: ${req.ip}`);
     res.status(options.statusCode).json(options.message);
   },
 });

@@ -10,7 +10,10 @@ export const createAppointment = async (req, res) => {
   const { property, date, time, message } = req.body;
 
   if (!property || !date || !time || !message) {
-    return res.status(400).json({ success: false, message: 'All fields (property, date, time, message) are required.' });
+    return res.status(400).json({
+      success: false,
+      message: 'All fields (property, date, time, message) are required.',
+    });
   }
 
   try {
@@ -21,15 +24,15 @@ export const createAppointment = async (req, res) => {
 
     const appointment = await Appointment.create({
       property,
-      user: req.user?.id,
+      user: req.user.id,
       date,
       time,
-      message
+      message,
     });
 
     res.status(201).json({ success: true, data: appointment });
   } catch (error) {
-    console.error('Create Appointment Error:', error);
+    console.error('Create Appointment Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -47,7 +50,7 @@ export const getAppointments = async (req, res) => {
 
     res.status(200).json({ success: true, data: appointments });
   } catch (error) {
-    console.error('Get Appointments Error:', error);
+    console.error('Get Appointments Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -69,7 +72,7 @@ export const getAppointmentById = async (req, res) => {
 
     res.status(200).json({ success: true, data: appointment });
   } catch (error) {
-    console.error('Get Appointment By ID Error:', error);
+    console.error('Get Appointment By ID Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -88,9 +91,10 @@ export const deleteAppointment = async (req, res) => {
     }
 
     await appointment.deleteOne();
+
     res.status(200).json({ success: true, message: 'Appointment cancelled' });
   } catch (error) {
-    console.error('Delete Appointment Error:', error);
+    console.error('Delete Appointment Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };

@@ -6,13 +6,14 @@ import jwt from 'jsonwebtoken';
  * @returns {string} Signed JWT token
  */
 const generateToken = (id) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('Missing JWT_SECRET in environment variables');
   }
 
-  const expiresIn = process.env.JWT_EXPIRE || '30d'; // Default to 30 days if not set
+  const expiresIn = process.env.JWT_EXPIRE || '30d';
 
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id }, secret, {
     expiresIn,
   });
 };

@@ -10,7 +10,7 @@ export const protect = async (req, res, next) => {
 
   if (
     req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
+    req.headers.authorization.startsWith('Bearer ')
   ) {
     token = req.headers.authorization.split(' ')[1];
 
@@ -23,16 +23,15 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ success: false, message: 'User not found, unauthorized' });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Token verification failed:', error.message);
       return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
     }
   }
 
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'Not authorized, no token' });
-  }
+  // If no token found
+  return res.status(401).json({ success: false, message: 'Not authorized, no token' });
 };
 
 /**

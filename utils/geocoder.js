@@ -1,18 +1,16 @@
 import NodeGeocoder from 'node-geocoder';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
-const provider = process.env.GEOCODER_PROVIDER || 'mapbox';
-const apiKey = process.env.GEOCODER_API_KEY;
 
-if (!apiKey) {
-  throw new Error('GEOCODER_API_KEY must be defined in environment variables');
+if (process.env.NODE_ENV !== 'production') {
+  console.log('GEOCODER_API_KEY:', process.env.GEOCODER_API_KEY);
 }
 
+
 const options = {
-  provider,
-  apiKey,
+  provider: process.env.GEOCODER_PROVIDER || 'mapbox',
+  apiKey: process.env.GEOCODER_API_KEY || 'pk.eyJ1IjoibmFuZGhhMDA3IiwiYSI6ImNtY3VkZGF5ajAwMHUyanF5d3hqY3ZnamEifQ.XUIZbSEKl_qROshULrR3WA',
   formatter: null,
 };
 
