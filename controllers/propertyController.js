@@ -71,7 +71,7 @@ export const createProperty = async (req, res) => {
     }
 
     const property = await Property.create({
-      agent: req.user.id, // ✅ req.user.id not _id
+      agent: req.user.id,
       title,
       description,
       price,
@@ -108,9 +108,9 @@ export const updateProperty = async (req, res) => {
         .json({ success: false, message: "Property not found" });
     }
 
-    // ✅ Fix authorization check
+    // Only owner agent can update
     if (
-      property.agent.toString() !== req.user.id && // 🔁 CHANGED from _id to id
+      property.agent.toString() !== req.user._id &&
       req.user.role !== "admin"
     ) {
       return res.status(403).json({
@@ -177,15 +177,16 @@ export const deleteProperty = async (req, res) => {
         .json({ success: false, message: "Property not found" });
     }
 
-    // ✅ Fix authorization check
     if (
-      property.agent.toString() !== req.user.id && // 🔁 CHANGED from _id to id
+      property.agent.toString() !== req.user._id &&
       req.user.role !== "admin"
     ) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to delete this property",
-      });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Not authorized to delete this property",
+        });
     }
 
     await property.deleteOne();
