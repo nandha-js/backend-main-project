@@ -110,7 +110,7 @@ export const updateProperty = async (req, res) => {
 
     // Only owner agent can update
     if (
-      property.agent.toString() !== req.user._id &&
+      property.agent.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
       return res.status(403).json({
@@ -178,7 +178,7 @@ export const deleteProperty = async (req, res) => {
     }
 
     if (
-      property.agent.toString() !== req.user._id &&
+      property.agent.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
       return res
