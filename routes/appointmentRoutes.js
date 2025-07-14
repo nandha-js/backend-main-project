@@ -4,6 +4,7 @@ import {
   getAppointments,
   getAppointmentById,
   deleteAppointment,
+  getAppointmentsForAgent, // ✅ Import the new controller
 } from '../controllers/appointmentController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
@@ -25,6 +26,9 @@ router.post(
 
 // ✅ Admin-only: Get all appointments
 router.get('/', protect, authorize('admin'), getAppointments);
+
+// ✅ Agent-only: Get all appointments for properties owned by the agent
+router.get('/agent/appointments', protect, authorize('agent'), getAppointmentsForAgent); // ✅ New route
 
 // ✅ Admin or Agent (owner): Get or delete appointment by ID
 router

@@ -43,7 +43,7 @@ export const createAppointment = async (req, res) => {
 };
 
 /**
- * @desc    Get all appointments
+ * @desc    Get all appointments (Admin only)
  * @route   GET /api/appointments
  * @access  Private (Admin only)
  */
@@ -122,6 +122,31 @@ export const deleteAppointment = async (req, res) => {
     res.status(200).json({ success: true, message: 'Appointment cancelled' });
   } catch (error) {
     console.error('Delete Appointment Error:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get appointments for properties owned by agent
+ * @route   GET /api/agent/appointments
+ * @access  Private (Agent only)
+ */
+export const getAppointmentsForAgent = async (req, res) => {
+  try {
+    if (req.user.role !== 'agent') {
+      return res.status(403).json({ success: false, message: 'Only agents can access this route' });
+    }
+
+    const agentProperties = await Property.find({ agent: req.user.id }).select('_id');
+    const propertyIds = agentProperties.map((p) => p._id);
+
+    const appointments = await Appointment.find({ property: { $in: propertyIds } })
+      .populate('property', 'title')
+      .populate('user', 'name email');
+
+    res.status(200).json({ success: true, data: appointments });
+  } catch (error) {
+    console.error('Get Agent Appointments Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };

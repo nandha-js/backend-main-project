@@ -1,7 +1,7 @@
 // backend-main-project/app.js
 
 import dotenv from 'dotenv';
-dotenv.config();  // Load .env early
+dotenv.config(); // Load .env early
 
 import express from 'express';
 import cors from 'cors';
@@ -17,7 +17,12 @@ import appointmentRoutes from './routes/appointmentRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
-// Middleware imports
+// Controller & Middleware imports for agent-specific appointment route
+import { getAppointmentsForAgent } from './controllers/appointmentController.js';
+import { protect } from './middleware/authMiddleware.js';
+import { authorize } from './middleware/roleMiddleware.js';
+
+// Error Middleware
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import rateLimit from './middleware/rateLimit.js';
 
@@ -29,13 +34,12 @@ connectDB();
 // Allowed origins for CORS
 const allowedOrigins = [
   'http://localhost:5173', // Vite dev server
-  'https://real-estate-client.onrender.com', // Your deployed frontend
+  'https://real-estate-client.onrender.com', // Deployed frontend
 ];
 
 // CORS options
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -49,16 +53,15 @@ const corsOptions = {
 
 // Middlewares
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10kb' })); // Protect against large payloads
+app.use(express.json({ limit: '10kb' }));
 app.use(helmet());
 app.use(rateLimit);
 
-// Use morgan logger in development mode only
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Health check route
+// Health Check Route
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -67,7 +70,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// API routes
+// Main API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/agents', agentRoutes);
@@ -75,11 +78,18 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 
-// 404 Not Found Middleware
+// ✅ Agent-specific route to get all their property appointments
+app.get(
+  '/api/agent/appointments',
+  protect,
+  authorize('agent'),
+  getAppointmentsForAgent
+);
+
+// 404 Not Found
 app.use(notFound);
 
-// Global Error Handling Middleware
+// Global Error Handler
 app.use(errorHandler);
 
 export default app;
- 
