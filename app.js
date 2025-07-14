@@ -16,6 +16,7 @@ import agentRoutes from './routes/agentRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import emailRoutes from './routes/emailRoutes.js'; // ✅ Email route added
 
 // Controller & Middleware imports for agent-specific appointment route
 import { getAppointmentsForAgent } from './controllers/appointmentController.js';
@@ -77,6 +78,7 @@ app.use('/api/agents', agentRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/email', emailRoutes); // ✅ Mount email routes here
 
 // ✅ Agent-specific route to get all their property appointments
 app.get(

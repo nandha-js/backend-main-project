@@ -6,6 +6,7 @@ import nodemailer from 'nodemailer';
  * @param   {string} options.email - Recipient email address
  * @param   {string} options.subject - Email subject
  * @param   {string} options.message - Email plain text content
+ * @param   {string} [options.html] - Optional HTML content
  * @returns {Object} Nodemailer info object
  */
 const sendEmail = async (options) => {
@@ -25,8 +26,8 @@ const sendEmail = async (options) => {
 
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(SMTP_PORT),  // safer than parseInt
-    secure: SMTP_SECURE === 'true', // true for port 465, false otherwise
+    port: Number(SMTP_PORT),
+    secure: SMTP_SECURE === 'true',
     auth: {
       user: SMTP_EMAIL,
       pass: SMTP_PASSWORD,
@@ -38,6 +39,7 @@ const sendEmail = async (options) => {
     to: options.email,
     subject: options.subject,
     text: options.message,
+    html: options.html || undefined, // ✅ Optional HTML email support
   };
 
   try {
@@ -51,4 +53,3 @@ const sendEmail = async (options) => {
 };
 
 export default sendEmail;
- 
