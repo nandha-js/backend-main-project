@@ -5,16 +5,17 @@ import {
   getAppointmentById,
   deleteAppointment,
 } from '../controllers/appointmentController.js';
+
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// Create appointment: inject propertyId param into body, then create
+// ✅ User-only route to create an appointment
 router.post(
   '/:propertyId',
   protect,
-  authorize('user', 'agent', 'admin'), // allow all roles
+  authorize('user'), // ❗ Only users can create appointments
   (req, res, next) => {
     req.body.property = req.params.propertyId;
     next();
@@ -22,15 +23,13 @@ router.post(
   createAppointment
 );
 
+// ✅ Admin-only: Get all appointments
+router.get('/', protect, authorize('admin'), getAppointments);
 
-// Get all appointments (admin & agent only)
-router.get('/', protect, authorize('admin', 'agent'), getAppointments);
-
-// Get appointment by ID (admin & agent), delete appointment (admin only)
+// ✅ Admin or Agent (owner): Get or delete appointment by ID
 router
   .route('/:id')
   .get(protect, authorize('admin', 'agent'), getAppointmentById)
-  .delete(protect, authorize('admin'), deleteAppointment);
+  .delete(protect, authorize('admin', 'agent'), deleteAppointment);
 
 export default router;
- 
