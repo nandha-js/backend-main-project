@@ -2,14 +2,14 @@
 import sendEmail from '../utils/sendEmail.js';
 
 /**
- * @desc    Send a test or contact email
+ * @desc    Send an email via contact form
  * @route   POST /api/email/send
  * @access  Public
  */
 export const sendTestEmail = async (req, res) => {
   const { email, subject, message, name = 'User' } = req.body;
 
-  // 1️⃣ Validate required fields
+  // 1️⃣ Validate fields
   if (!email || !subject || !message) {
     return res.status(400).json({
       success: false,
@@ -17,7 +17,7 @@ export const sendTestEmail = async (req, res) => {
     });
   }
 
-  // 2️⃣ Basic email format check
+  // 2️⃣ Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -26,7 +26,7 @@ export const sendTestEmail = async (req, res) => {
     });
   }
 
-  // 3️⃣ HTML email content
+  // 3️⃣ HTML Email content
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
       <h2 style="color: #007acc;">📩 New Message from ${name}</h2>
@@ -44,10 +44,9 @@ export const sendTestEmail = async (req, res) => {
       email,
       subject,
       message,
-      html: htmlContent, // ✅ Pass HTML content
+      html: htmlContent,
     });
 
-    // 4️⃣ Return detailed confirmation
     return res.status(200).json({
       success: true,
       message: `✅ Email successfully sent to ${email}`,
