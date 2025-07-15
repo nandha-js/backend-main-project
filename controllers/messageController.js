@@ -1,4 +1,5 @@
 import Message from '../models/Message.js';
+import sendEmail from '../utils/sendEmail.js';
 
 /**
  * @desc    Send a message
@@ -26,7 +27,7 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    // 3️⃣ Create message
+    // 3️⃣ Create message in DB
     const newMessage = await Message.create({
       name,
       email,
@@ -35,6 +36,45 @@ export const sendMessage = async (req, res) => {
       property,
       ...(req.user && { user: req.user.id }), // Add user if logged in
     });
+
+    // 4️⃣ Prepare HTML content
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>📩 New Message from ${name}</h2>
+        <p><strong>Email:</strong> ${email}</p>
+        ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+        ${property?.title ? `<p><strong>Property:</strong> ${property.title}</p>` : ''}
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+        <hr>
+        <small>Received at ${new Date().toLocaleString()}</small>
+      </div>
+    `;
+
+    // 5️⃣ Prepare recipients
+    const recipients = [
+      {
+        email: 'admin@gmail.com', 
+        subject: '📨 New Contact Message on Real Estate Platform',
+      },
+    ];
+
+    if (property?.agent?.email) {
+      recipients.push({
+        email: property.agent.email,
+        subject: '📨 New Message About Your Property',
+      });
+    }
+
+    // 6️⃣ Send emails
+    for (const recipient of recipients) {
+      await sendEmail({
+        email: recipient.email,
+        subject: recipient.subject,
+        message: `You have received a new message from ${name}`,
+        html,
+      });
+    }
 
     res.status(201).json({
       success: true,

@@ -1,7 +1,6 @@
-// routes/adminRoutes.js
 import express from 'express';
 import {
-  getDashboardSummary,
+  getAdminStats,       
   getAllUsers,
   deleteUser,
   getAllAgents,
@@ -9,27 +8,28 @@ import {
   getAllProperties,
   deleteProperty,
 } from '../controllers/adminController.js';
-import { protect, authorize } from '../middleware/authMiddleware.js';
+
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// Protect all admin routes with authentication and admin role
+// ✅ Protect all admin routes
 router.use(protect, authorize('admin'));
 
-// Dashboard Summary
-router.get('/dashboard', getDashboardSummary);
+// ✅ Dashboard statistics route
+router.get('/stats', getAdminStats);
 
-// Users
+// ✅ User management
 router.get('/users', getAllUsers);
 router.delete('/users/:id', deleteUser);
 
-// Agents
+// ✅ Agent management
 router.get('/agents', getAllAgents);
 router.delete('/agents/:id', deleteAgent);
 
-// Properties
+// ✅ Property management
 router.get('/properties', getAllProperties);
 router.delete('/properties/:id', deleteProperty);
 
 export default router;
- 
