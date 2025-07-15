@@ -13,11 +13,10 @@ const router = express.Router();
 // Public route to send a message
 router.route('/')
   .post(sendMessage) // Anyone can send a message
-  .get(protect, authorize('admin'), getMessages); // Admin only can view all messages
+  .get(protect, authorize('admin', 'agent'), getMessages); // ✅ Admin & Agent can view
 
 // Admin-only delete message by ID
 router.route('/:id')
   .delete(protect, authorize('admin'), deleteMessage);
 
 export default router;
- 
