@@ -36,7 +36,8 @@ connectDB();
 const allowedOrigins = [
   'http://localhost:5173',
   'https://real-estate-client.onrender.com',
-  'https://dancing-vacherin-748008.netlify.app', // ✅ your Netlify site
+  'https://dancing-vacherin-748008.netlify.app', 
+  'https://roaring-sunshine-c86225.netlify.app',
 ];
 
 
