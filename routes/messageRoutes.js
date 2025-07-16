@@ -1,7 +1,9 @@
 import express from 'express';
 import {
   sendMessage,
+  sendMessageToUser,
   getMessages,
+  getMyMessages,
   deleteMessage,
 } from '../controllers/messageController.js';
 
@@ -10,13 +12,25 @@ import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// Public route to send a message
-router.route('/')
-  .post(sendMessage) // Anyone can send a message
-  .get(protect, authorize('admin', 'agent'), getMessages); // ✅ Admin & Agent can view
+// 📨 Anyone can contact (message admin or agent)
+router
+  .route('/')
+  .post(sendMessage) // Public access
+  .get(protect, authorize('admin', 'agent'), getMessages); // Admin & Agent see all
 
-// Admin-only delete message by ID
-router.route('/:id')
+// 🧑‍💼 Agent/Admin contact user
+router
+  .route('/send-to-user')
+  .post(protect, authorize('admin', 'agent'), sendMessageToUser); // Agent/Admin → User
+
+// 👤 User views own received messages
+router
+  .route('/my-messages')
+  .get(protect, authorize('user'), getMyMessages); // User → Own messages
+
+// ❌ Delete message by ID (admin only)
+router
+  .route('/:id')
   .delete(protect, authorize('admin'), deleteMessage);
 
 export default router;

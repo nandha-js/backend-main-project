@@ -1,16 +1,16 @@
 import Message from '../models/Message.js';
 import sendEmail from '../utils/sendEmail.js';
+import User from '../models/User.js';
 
 /**
- * @desc    Send a message
+ * @desc    User contacts about property
  * @route   POST /api/messages
- * @access  Public (or Protected if user is logged in)
+ * @access  Public or Protected
  */
 export const sendMessage = async (req, res) => {
   try {
     const { name, email, phone, message, property } = req.body;
 
-    // 1️⃣ Validate required fields
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -18,7 +18,6 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    // 2️⃣ Email format check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -27,17 +26,15 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    // 3️⃣ Create message in DB
     const newMessage = await Message.create({
       name,
       email,
       phone,
       message,
       property,
-      ...(req.user && { user: req.user.id }), // Add user if logged in
+      ...(req.user && { user: req.user.id }),
     });
 
-    // 4️⃣ Prepare HTML content
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2>📩 New Message from ${name}</h2>
@@ -51,10 +48,9 @@ export const sendMessage = async (req, res) => {
       </div>
     `;
 
-    // 5️⃣ Prepare recipients
     const recipients = [
       {
-        email: 'admin@gmail.com', 
+        email: 'admin@gmail.com',
         subject: '📨 New Contact Message on Real Estate Platform',
       },
     ];
@@ -66,7 +62,6 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    // 6️⃣ Send emails
     for (const recipient of recipients) {
       await sendEmail({
         email: recipient.email,
@@ -92,6 +87,72 @@ export const sendMessage = async (req, res) => {
 };
 
 /**
+ * @desc    Agent contacts user
+ * @route   POST /api/messages/send-to-user
+ * @access  Private (Agent/Admin only)
+ */
+export const sendMessageToUser = async (req, res) => {
+  try {
+    const { to, subject, message } = req.body;
+
+    if (!to || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: '❌ To, subject, and message are required',
+      });
+    }
+
+    const recipientUser = await User.findOne({ email: to });
+
+    if (!recipientUser) {
+      return res.status(404).json({
+        success: false,
+        message: '❌ No user found with this email',
+      });
+    }
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>📬 Message from Agent</h2>
+        <p><strong>From:</strong> ${req.user?.name || 'Agent'} (${req.user?.email})</p>
+        <p><strong>To:</strong> ${to}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+        <hr>
+        <small>Sent on ${new Date().toLocaleString()}</small>
+      </div>
+    `;
+
+    await sendEmail({
+      email: to,
+      subject,
+      message: `Message from Agent: ${subject}`,
+      html,
+    });
+
+    await Message.create({
+      name: req.user?.name || 'Agent',
+      email: to,
+      message,
+      user: req.user?._id,         // sender
+      recipient: recipientUser._id // receiver
+    });
+
+    res.status(200).json({
+      success: true,
+      message: '✅ Message sent to user successfully',
+    });
+  } catch (error) {
+    console.error('❌ Agent to User Message Error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: '❌ Server Error while sending agent message',
+      error: error.message,
+    });
+  }
+};
+
+/**
  * @desc    Get all messages
  * @route   GET /api/messages
  * @access  Private (Admin & Agent)
@@ -100,6 +161,8 @@ export const getMessages = async (req, res) => {
   try {
     const messages = await Message.find()
       .populate('property', 'title')
+      .populate('recipient', 'name email')
+      .populate('user', 'name email')
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, data: messages });
@@ -108,6 +171,32 @@ export const getMessages = async (req, res) => {
     res.status(500).json({
       success: false,
       message: '❌ Server Error while fetching messages',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    User sees their received messages
+ * @route   GET /api/messages/my-messages
+ * @access  Private (User only)
+ */
+export const getMyMessages = async (req, res) => {
+  try {
+    const messages = await Message.find({ recipient: req.user._id })
+      .populate('user', 'name email') // sender
+      .populate('property', 'title')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: messages,
+    });
+  } catch (error) {
+    console.error('❌ My Messages Error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: '❌ Server Error while fetching your messages',
       error: error.message,
     });
   }

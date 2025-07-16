@@ -30,7 +30,11 @@ const messageSchema = new mongoose.Schema(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'User', // ✅ sender (can be user or agent)
+    },
+    recipient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // ✅ recipient user (when agent contacts user)
     },
   },
   {
@@ -41,4 +45,3 @@ const messageSchema = new mongoose.Schema(
 const Message = mongoose.model('Message', messageSchema);
 
 export default Message;
- 
