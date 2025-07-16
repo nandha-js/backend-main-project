@@ -97,6 +97,22 @@ export const getUserProfile = async (req, res) => {
 };
 
 /**
+ * Get public agent profile by ID
+ */
+export const getAgentPublicProfile = async (req, res) => {
+  try {
+    const agent = await User.findById(req.params.id).select('-password');
+    if (!agent || agent.role !== 'agent') {
+      return res.status(404).json({ message: 'Agent not found' });
+    }
+    res.status(200).json({ success: true, data: agent });
+  } catch (error) {
+    console.error('Error fetching agent profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
  * Update user details (profile)
  */
 export const updateDetails = async (req, res) => {
@@ -104,7 +120,7 @@ export const updateDetails = async (req, res) => {
     name: req.body.name,
     email: req.body.email,
     phone: req.body.phone,
-    bio: req.body.bio, // ✅ added bio support
+    bio: req.body.bio,
   };
 
   try {

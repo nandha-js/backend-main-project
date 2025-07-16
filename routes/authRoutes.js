@@ -3,6 +3,7 @@ import {
   registerUser,
   loginUser,
   getUserProfile,
+  getAgentPublicProfile, // ✅ newly added controller
   updateDetails,
   updatePassword,
 } from '../controllers/authController.js';
@@ -39,6 +40,11 @@ router.post('/login', loginValidator, validate, loginUser);
 // @desc     Get logged in user profile
 router.get('/profile', protect, getUserProfile);
 
+// ✅ New public route to get agent profile by ID
+// @route    GET /api/auth/profile/:id
+// @desc     Get public agent profile
+router.get('/profile/:id', getAgentPublicProfile);
+
 // @route    PUT /api/auth/profile
 // @desc     Update logged in user profile
 router.put('/profile', protect, updateProfileValidator, validate, updateDetails);
@@ -48,4 +54,3 @@ router.put('/profile', protect, updateProfileValidator, validate, updateDetails)
 router.put('/password', protect, updatePassword);
 
 export default router;
- 
