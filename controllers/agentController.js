@@ -8,7 +8,7 @@ import Property from '../models/Property.js';
  */
 export const createAgent = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, bio } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -33,6 +33,7 @@ export const createAgent = async (req, res) => {
     };
 
     if (phone) newAgentData.phone = phone;
+    if (bio) newAgentData.bio = bio;
 
     const newAgent = await User.create(newAgentData);
 
@@ -42,6 +43,8 @@ export const createAgent = async (req, res) => {
         _id: newAgent._id,
         name: newAgent.name,
         email: newAgent.email,
+        phone: newAgent.phone,
+        bio: newAgent.bio,
         role: newAgent.role,
       },
     });
@@ -130,9 +133,11 @@ export const updateAgent = async (req, res) => {
       }
     }
 
+    // Update fields if provided
     agent.name = req.body.name ?? agent.name;
     agent.email = req.body.email ?? agent.email;
     agent.phone = req.body.phone ?? agent.phone;
+    agent.bio = req.body.bio ?? agent.bio; // ✅ Added bio update
 
     const updatedAgent = await agent.save();
 
@@ -143,6 +148,7 @@ export const updateAgent = async (req, res) => {
         name: updatedAgent.name,
         email: updatedAgent.email,
         phone: updatedAgent.phone,
+        bio: updatedAgent.bio,
         role: updatedAgent.role,
       },
     });
@@ -179,5 +185,5 @@ export const deleteAgent = async (req, res) => {
       message: 'Server Error',
       error: error.message,
     });
-  } 
+  }
 };

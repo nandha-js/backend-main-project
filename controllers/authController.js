@@ -7,7 +7,7 @@ import sendEmail from '../utils/sendEmail.js';
  * Register a new user
  */
 export const registerUser = async (req, res) => {
-  const { name, email, password, role, phone } = req.body;
+  const { name, email, password, role, phone, bio } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
@@ -23,7 +23,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    const allowedRoles = ['user', 'agent', 'admin']; // include admin if needed
+    const allowedRoles = ['user', 'agent', 'admin'];
     const assignedRole = allowedRoles.includes(role) ? role : 'user';
 
     const user = await User.create({
@@ -31,6 +31,7 @@ export const registerUser = async (req, res) => {
       email,
       password,
       phone: phone || '',
+      bio: bio || '',
       role: assignedRole,
     });
 
@@ -45,7 +46,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Register User Error:', error.message);
+    console.error('❌ Register User Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -76,7 +77,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Login Error:', error.message);
+    console.error('❌ Login Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -90,19 +91,20 @@ export const getUserProfile = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    console.error('Get Profile Error:', error.message);
+    console.error('❌ Get Profile Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
 
 /**
- * Update user details
+ * Update user details (profile)
  */
 export const updateDetails = async (req, res) => {
   const updates = {
     name: req.body.name,
     email: req.body.email,
     phone: req.body.phone,
+    bio: req.body.bio, // ✅ added bio support
   };
 
   try {
@@ -117,7 +119,7 @@ export const updateDetails = async (req, res) => {
 
     res.status(200).json({ success: true, data: user });
   } catch (err) {
-    console.error('Update Details Error:', err.message);
+    console.error('❌ Update Details Error:', err.message);
     res.status(500).json({ success: false, message: 'Server Error', error: err.message });
   }
 };
@@ -148,7 +150,7 @@ export const updatePassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Update Password Error:', error.message);
+    console.error('❌ Update Password Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -182,7 +184,7 @@ export const forgotPassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Reset email sent successfully' });
   } catch (error) {
-    console.error('ForgotPassword Error:', error.message);
+    console.error('❌ ForgotPassword Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -196,7 +198,7 @@ export const resetPassword = async (req, res) => {
   try {
     const user = await User.findOne({
       resetPasswordToken: resetToken,
-      resetPasswordExpire: { $gt: Date.now() }
+      resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired token' });
@@ -213,8 +215,7 @@ export const resetPassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Password has been reset' });
   } catch (error) {
-    console.error('ResetPassword Error:', error.message);
+    console.error('❌ ResetPassword Error:', error.message);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
- 
