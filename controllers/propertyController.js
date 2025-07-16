@@ -1,42 +1,55 @@
 import Property from "../models/Property.js";
 import geocoder from "../utils/geocoder.js";
 
-// @desc    Get all properties
+// @desc    Get all properties with filter options
 export const getProperties = async (req, res) => {
   try {
-    const properties = await Property.find().populate(
-      "agent",
-      "name email phone"
-    );
-    res
-      .status(200)
-      .json({ success: true, count: properties.length, data: properties });
+    const { location, type, minPrice, maxPrice, bedrooms, bathrooms } = req.query;
+
+    const query = {};
+
+    if (location) {
+      query.address = { $regex: location, $options: 'i' }; // case-insensitive search
+    }
+
+    if (type) {
+      query.type = type.toLowerCase();
+    }
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    if (bedrooms) {
+      query.bedrooms = { $gte: Number(bedrooms) };
+    }
+
+    if (bathrooms) {
+      query.bathrooms = { $gte: Number(bathrooms) };
+    }
+
+    const properties = await Property.find(query).populate("agent", "name email phone");
+
+    res.status(200).json({ success: true, count: properties.length, data: properties });
   } catch (error) {
     console.error("Get Properties Error:", error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
 // @desc    Get single property by ID
 export const getPropertyById = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id).populate(
-      "agent",
-      "name email phone"
-    );
+    const property = await Property.findById(req.params.id).populate("agent", "name email phone");
     if (!property) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Property not found" });
+      return res.status(404).json({ success: false, message: "Property not found" });
     }
     res.status(200).json({ success: true, data: property });
   } catch (error) {
     console.error("Get Property By ID Error:", error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
@@ -65,9 +78,7 @@ export const createProperty = async (req, res) => {
   try {
     const loc = await geocoder.geocode(address);
     if (!loc?.length || !loc[0].formattedAddress) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid address for geocoding" });
+      return res.status(400).json({ success: false, message: "Invalid address for geocoding" });
     }
 
     const property = await Property.create({
@@ -92,9 +103,7 @@ export const createProperty = async (req, res) => {
     res.status(201).json({ success: true, data: property });
   } catch (error) {
     console.error("Create Property Error:", error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
@@ -103,16 +112,11 @@ export const updateProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
     if (!property) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Property not found" });
+      return res.status(404).json({ success: false, message: "Property not found" });
     }
 
-    // Only owner agent can update
-    if (
-      property.agent.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
+    // Only owner agent or admin can update
+    if (property.agent.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this property",
@@ -135,9 +139,7 @@ export const updateProperty = async (req, res) => {
     if (address && address !== property.address) {
       const loc = await geocoder.geocode(address);
       if (!loc?.length || !loc[0].formattedAddress) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid address for geocoding" });
+        return res.status(400).json({ success: false, message: "Invalid address for geocoding" });
       }
       property.address = address;
       property.location = {
@@ -154,16 +156,14 @@ export const updateProperty = async (req, res) => {
     property.size = size ?? property.size;
     property.rooms = rooms ?? property.rooms;
     property.bedrooms = bedrooms ?? property.bedrooms;
-    property.bathrooms = bathrooms ?? property.bathrooms; 
+    property.bathrooms = bathrooms ?? property.bathrooms;
     property.images = images ?? property.images;
 
     const updatedProperty = await property.save();
     res.status(200).json({ success: true, data: updatedProperty });
   } catch (error) {
     console.error("Update Property Error:", error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
 
@@ -172,29 +172,20 @@ export const deleteProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
     if (!property) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Property not found" });
+      return res.status(404).json({ success: false, message: "Property not found" });
     }
 
-    if (
-      property.agent.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Not authorized to delete this property",
-        });
+    if (property.agent.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this property",
+      });
     }
 
     await property.deleteOne();
     res.status(200).json({ success: true, message: "Property removed" });
   } catch (error) {
     console.error("Delete Property Error:", error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
