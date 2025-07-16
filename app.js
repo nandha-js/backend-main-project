@@ -34,9 +34,11 @@ connectDB();
 
 // Allowed origins for CORS
 const allowedOrigins = [
-  'http://localhost:5173', // Vite dev server
-  'https://real-estate-client.onrender.com', // Deployed frontend
+  'http://localhost:5173',
+  'https://real-estate-client.onrender.com',
+  'https://dancing-vacherin-748008.netlify.app', // ✅ your Netlify site
 ];
+
 
 // CORS options
 const corsOptions = {
